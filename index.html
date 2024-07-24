@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vorhersage-Website</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="background">
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+    <div class="container">
+        <h1>Vorhersage-Website</h1>
+        <form action="/submit" method="post">
+            <label for="name">Name:</label><br>
+            <input type="text" id="name" name="name" required><br><br>
+
+            <label for="email">Email:</label><br>
+            <input type="email" id="email" name="email" required><br><br>
+
+            <label for="date">Datum:</label><br>
+            <input type="date" id="date" name="date" required><br><br>
+
+            <label for="subject">Betreff:</label><br>
+            <input type="text" id="subject" name="subject" required><br><br>
+
+            <label for="description">Beschreibung:</label><br>
+            <textarea id="description" name="description" required></textarea><br><br>
+
+            <input type="submit" value="Einreichen">
+        </form>
+    </div>
+</body>
+</html>
