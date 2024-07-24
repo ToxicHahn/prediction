@@ -1,11 +1,17 @@
 from flask import Flask, request, render_template, redirect, url_for, flash
+from flask_sqlalchemy import SQLAlchemy
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from config import Config
+from models import db, Bet
 
 app = Flask(__name__)
 app.config.from_object(Config)
+db.init_app(app)
+
+with app.app_context():
+    db.create_all()
 
 def send_smtp2go_email(to, subject, html_content):
     msg = MIMEMultipart()
@@ -28,7 +34,8 @@ def send_smtp2go_email(to, subject, html_content):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    bets = Bet.query.order_by(Bet.timestamp.desc()).all()
+    return render_template('index.html', bets=bets)
 
 @app.route('/submit', methods=['POST'])
 def submit():
@@ -37,6 +44,10 @@ def submit():
     date = request.form.get('date')
     subject = request.form.get('subject')
     description = request.form.get('description')
+
+    new_bet = Bet(name=name, email=email, date=date, subject=subject, description=description)
+    db.session.add(new_bet)
+    db.session.commit()
 
     success = send_smtp2go_email(
         to=email,
@@ -50,6 +61,11 @@ def submit():
         flash('Fehler beim Senden der E-Mail.', 'error')
 
     return redirect(url_for('index'))
+
+@app.route('/bet/<int:bet_id>')
+def bet_detail(bet_id):
+    bet = Bet.query.get_or_404(bet_id)
+    return render_template('bet_detail.html', bet=bet)
 
 @app.route('/test_email', methods=['POST'])
 def test_email():
