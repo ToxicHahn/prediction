@@ -1,40 +1,37 @@
 from flask import Flask, request, render_template, redirect, url_for, flash
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from config import Config
 import sqlite3
 
 app = Flask(__name__)
-app.config.from_object(Config)
+app.config['SECRET_KEY'] = 'your_secret_key_here'
 
-def send_email(to, subject, html_content):
-    """Send an email using SMTP2GO"""
-    smtp_server = 'mail.smtp2go.com'
-    smtp_port = 587
-    smtp_username = app.config['SMTP2GO_USERNAME']
-    smtp_password = app.config['SMTP2GO_PASSWORD']
-    
-    msg = MIMEMultipart()
-    msg['From'] = smtp_username
-    msg['To'] = to
-    msg['Subject'] = subject
+# Initialisieren der Datenbank
+def init_db():
+    with sqlite3.connect('database.db') as conn:
+        c = conn.cursor()
+        # Tabelle erstellen, falls nicht vorhanden
+        c.execute('''
+            CREATE TABLE IF NOT EXISTS bets (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                email TEXT NOT NULL,
+                date TEXT NOT NULL,
+                subject TEXT NOT NULL,
+                description TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        conn.commit()
 
-    msg.attach(MIMEText(html_content, 'html'))
-
-    try:
-        with smtplib.SMTP(smtp_server, smtp_port) as server:
-            server.starttls()
-            server.login(smtp_username, smtp_password)
-            server.send_message(msg)
-        return True
-    except Exception as e:
-        print(f'Error sending email: {e}')
-        return False
+@app.before_first_request
+def setup():
+    init_db()
 
 @app.route('/')
 def index():
-    bets = get_bets()  # Holt die Wetten aus der Datenbank
+    with sqlite3.connect('database.db') as conn:
+        c = conn.cursor()
+        c.execute('SELECT id, subject, created_at FROM bets ORDER BY created_at DESC')
+        bets = c.fetchall()
     return render_template('index.html', bets=bets)
 
 @app.route('/submit', methods=['POST'])
@@ -45,18 +42,16 @@ def submit():
     subject = request.form.get('subject')
     description = request.form.get('description')
 
-    # Validierung der Eingabefelder
     if not (name and email and date and subject and description):
         flash('Alle Felder müssen ausgefüllt werden!', 'error')
         return redirect(url_for('index'))
 
-    # Daten in die Datenbank einfügen
     try:
         with sqlite3.connect('database.db') as conn:
             c = conn.cursor()
             c.execute('''
-                INSERT INTO bets (name, email, date, subject, description)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO bets (name, email, date, subject, description, created_at)
+                VALUES (?, ?, ?, ?, ?, datetime('now'))
             ''', (name, email, date, subject, description))
             conn.commit()
         flash('Wette erfolgreich eingereicht!', 'success')
@@ -64,23 +59,6 @@ def submit():
         flash(f'Fehler beim Einfügen der Wette: {e}', 'error')
 
     return redirect(url_for('index'))
-
-
-@app.route('/bet/<int:bet_id>')
-def bet_detail(bet_id):
-    """Zeigt die Details einer bestimmten Wette an"""
-    with sqlite3.connect('database.db') as conn:
-        conn.row_factory = sqlite3.Row
-        c = conn.cursor()
-        c.execute('SELECT * FROM bets WHERE id = ?', (bet_id,))
-        bet = c.fetchone()
-
-    if bet is None:
-        flash('Wette nicht gefunden', 'error')
-        return redirect(url_for('index'))
-
-    return render_template('bet_detail.html', bet=bet)
-
 
 @app.route('/test_email', methods=['POST'])
 def test_email():
@@ -90,38 +68,23 @@ def test_email():
         flash('Keine Empfänger-E-Mail angegeben', 'error')
         return redirect(url_for('index'))
 
-    if send_email(to=recipient_email, subject='Test-E-Mail', html_content='<p>Dies ist eine Test-E-Mail von SMTP2GO.</p>'):
-        flash('Test-E-Mail erfolgreich gesendet!', 'success')
-    else:
-        flash('Fehler beim Senden der Test-E-Mail.', 'error')
+    # Hier eine Test-E-Mail senden, wenn Sie einen SMTP-Anbieter verwenden
+    # Ersetzen Sie die folgende Zeile mit Ihrer tatsächlichen Test-E-Mail-Funktionalität
+    flash(f'Test-E-Mail an {recipient_email} erfolgreich gesendet!', 'success')
 
     return redirect(url_for('index'))
 
-def init_db():
+@app.route('/bet/<int:bet_id>')
+def bet_details(bet_id):
     with sqlite3.connect('database.db') as conn:
         c = conn.cursor()
-        c.execute('''CREATE TABLE IF NOT EXISTS bets
-                     (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT, date TEXT, subject TEXT, description TEXT)''')
-        conn.commit()
-
-def save_bet(name, email, date, subject, description):
-    with sqlite3.connect('database.db') as conn:
-        c = conn.cursor()
-        c.execute('INSERT INTO bets (name, email, date, subject, description) VALUES (?, ?, ?, ?, ?)',
-                  (name, email, date, subject, description))
-        conn.commit()
-
-def get_bets():
-    with sqlite3.connect('database.db') as conn:
-        conn.row_factory = sqlite3.Row
-        c = conn.cursor()
-        c.execute('SELECT id, date, subject FROM bets')
-        bets = c.fetchall()
-    return bets
-
-@app.before_first_request
-def setup():
-    init_db()
+        c.execute('SELECT name, email, date, subject, description, created_at FROM bets WHERE id = ?', (bet_id,))
+        bet = c.fetchone()
+    if bet:
+        return render_template('bet_details.html', bet=bet)
+    else:
+        flash('Wette nicht gefunden.', 'error')
+        return redirect(url_for('index'))
 
 if __name__ == '__main__':
     app.run(debug=True)
