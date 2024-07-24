@@ -1,0 +1,174 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
+    background-color: #f0f4f8;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* Sicherstellen, dass der Body den gesamten Viewport einnimmt */
+}
+
+.background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+}
+
+.shape {
+    position: absolute;
+    border-radius: 50%;
+    animation: float 6s ease-in-out infinite;
+    opacity: 0.7;
+}
+
+.shape:nth-child(1) {
+    background: linear-gradient(135deg, #6e8efb, #a777e3);
+    top: -100px;
+    left: -100px;
+    width: 400px;
+    height: 400px;
+}
+
+.shape:nth-child(2) {
+    background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+    bottom: -100px;
+    right: -100px;
+    width: 300px;
+    height: 300px;
+}
+
+.shape:nth-child(3) {
+    background: linear-gradient(135deg, #fbc2eb, #a6c0fe);
+    top: 20%;
+    left: 20%;
+    width: 200px;
+    height: 200px;
+}
+
+.shape:nth-child(4) {
+    background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
+    bottom: 20%;
+    right: 20%;
+    width: 150px;
+    height: 150px;
+}
+
+.shape:nth-child(5) {
+    background: linear-gradient(135deg, #f6d365, #fda085);
+    top: 40%;
+    left: 60%;
+    width: 250px;
+    height: 250px;
+}
+
+.shape:nth-child(6) {
+    background: linear-gradient(135deg, #e3c6e3, #c5c6e6);
+    bottom: 10%;
+    right: 10%;
+    width: 100px;
+    height: 100px;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-15px);
+    }
+}
+
+.container {
+    position: relative;
+    width: 100%;
+    max-width: 500px; /* Maximale Breite des Containers */
+    padding: 20px; /* Padding für den Container reduziert */
+    background-color: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    text-align: center;
+    box-sizing: border-box;
+    margin: 50px; /* Abstand vom Rand des Viewports */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.header-message {
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, #ff6b6b, #f06595);
+    padding: 10px;
+    border-radius: 8px;
+    width: 100%; /* Volle Breite des Containers */
+}
+
+.header-message h2 {
+    margin: 0;
+    color: white;
+    font-size: 1.25rem; /* Kleinere Schriftgröße */
+    font-family: 'Dancing Script', cursive; /* Verspielte Schriftart */
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%; /* Volle Breite des Containers */
+}
+
+.form-group {
+    width: 100%;
+    margin-bottom: 15px; /* Kleinere Abstände zwischen den Feldern */
+    text-align: left;
+}
+
+label {
+    display: block;
+    font-size: 0.875rem; /* Kleinere Schriftgröße für Labels */
+    margin-bottom: 5px;
+    color: #555;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 10px; /* Weniger Padding für Eingabefelder */
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px; /* Kleinere Schriftgröße */
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+}
+
+input:focus, textarea:focus {
+    border-color: #6e8efb;
+    outline: none;
+}
+
+textarea {
+    resize: vertical;
+    height: 80px; /* Kleinere Höhe für Textarea */
+}
+
+input[type="submit"] {
+    width: auto;
+    padding: 8px 16px; /* Weniger Padding für den Button */
+    background-color: #6e8efb;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px; /* Kleinere Schriftgröße für Button */
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+input[type="submit"]:hover {
+    background-color: #a777e3;
+    transform: translateY(-1px);
+}

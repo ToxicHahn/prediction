@@ -1,0 +1,7 @@
+Flask==2.2.2
+requests
+Flask-SQLAlchemy==2.5.1
+Flask-Mail==0.9.1
+APScheduler==3.7.0
+SQLAlchemy==1.4.29
+Werkzeug==2.2.2  # Kompatible Version von Werkzeug
