@@ -1,40 +1,61 @@
 from flask import Flask, request, render_template, redirect, url_for, flash
-from flask_sqlalchemy import SQLAlchemy
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
+import requests
 from config import Config
-from models import db, Bet
+import sqlite3
 
 app = Flask(__name__)
 app.config.from_object(Config)
-db.init_app(app)
+app.secret_key = 'your_secret_key'
 
-with app.app_context():
-    db.create_all()
+def init_db():
+    with sqlite3.connect('database.db') as conn:
+        c = conn.cursor()
+        c.execute('''CREATE TABLE IF NOT EXISTS bets
+                     (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT, date TEXT, subject TEXT, description TEXT)''')
+        conn.commit()
 
-def send_smtp2go_email(to, subject, html_content):
-    msg = MIMEMultipart()
-    msg['From'] = app.config['SMTP2GO_USERNAME']
-    msg['To'] = to
-    msg['Subject'] = subject
+def add_example_bets():
+    with sqlite3.connect('database.db') as conn:
+        c = conn.cursor()
+        example_bets = [
+            ("Max Mustermann", "max@example.com", "2024-07-25", "Wettervorhersage", "Es wird sonnig und warm."),
+            ("Erika Musterfrau", "erika@example.com", "2024-07-26", "Aktienkurs", "Der Kurs von XYZ wird steigen."),
+            ("Hans Wurst", "hans@example.com", "2024-07-27", "Sportergebnis", "Team A gewinnt gegen Team B.")
+        ]
+        c.executemany('INSERT INTO bets (name, email, date, subject, description) VALUES (?, ?, ?, ?, ?)', example_bets)
+        conn.commit()
 
-    msg.attach(MIMEText(html_content, 'html'))
+def get_bets():
+    with sqlite3.connect('database.db') as conn:
+        conn.row_factory = sqlite3.Row
+        c = conn.cursor()
+        c.execute('SELECT id, date, subject FROM bets')
+        bets = c.fetchall()
+    return bets
 
-    try:
-        server = smtplib.SMTP(app.config['SMTP2GO_SMTP_SERVER'], app.config['SMTP2GO_SMTP_PORT'])
-        server.starttls()
-        server.login(app.config['SMTP2GO_USERNAME'], app.config['SMTP2GO_PASSWORD'])
-        server.sendmail(app.config['SMTP2GO_USERNAME'], to, msg.as_string())
-        server.quit()
-        return True
-    except Exception as e:
-        print(f"Fehler beim Senden der E-Mail: {e}")
-        return False
+@app.before_first_request
+def setup():
+    init_db()
+    add_example_bets()
+
+def send_brevo_email(to, subject, html_content):
+    url = "https://api.brevo.com/v3/smtp/email"
+    headers = {
+        "Content-Type": "application/json",
+        "api-key": app.config['BREVO_API_KEY']
+    }
+    data = {
+        "sender": {"email": "792fa0001@smtp-brevo.com"},
+        "to": [{"email": to}],
+        "subject": subject,
+        "htmlContent": html_content
+    }
+    response = requests.post(url, json=data, headers=headers)
+    return response.json()
 
 @app.route('/')
 def index():
-    bets = Bet.query.order_by(Bet.timestamp.desc()).all()
+    bets = get_bets()
     return render_template('index.html', bets=bets)
 
 @app.route('/submit', methods=['POST'])
@@ -45,27 +66,23 @@ def submit():
     subject = request.form.get('subject')
     description = request.form.get('description')
 
-    new_bet = Bet(name=name, email=email, date=date, subject=subject, description=description)
-    db.session.add(new_bet)
-    db.session.commit()
-
-    success = send_smtp2go_email(
+    response = send_brevo_email(
         to=email,
         subject=f"Vorhersage für {subject}",
         html_content=f"<p>Hallo {name},</p><p>{description}</p>"
     )
 
-    if success:
+    if response.get('messageId'):
         flash('E-Mail wurde erfolgreich gesendet!', 'success')
+        with sqlite3.connect('database.db') as conn:
+            c = conn.cursor()
+            c.execute('INSERT INTO bets (name, email, date, subject, description) VALUES (?, ?, ?, ?, ?)',
+                      (name, email, date, subject, description))
+            conn.commit()
     else:
         flash('Fehler beim Senden der E-Mail.', 'error')
 
     return redirect(url_for('index'))
-
-@app.route('/bet/<int:bet_id>')
-def bet_detail(bet_id):
-    bet = Bet.query.get_or_404(bet_id)
-    return render_template('bet_detail.html', bet=bet)
 
 @app.route('/test_email', methods=['POST'])
 def test_email():
@@ -75,18 +92,27 @@ def test_email():
         flash('Keine Empfänger-E-Mail angegeben', 'error')
         return redirect(url_for('index'))
 
-    success = send_smtp2go_email(
+    response = send_brevo_email(
         to=recipient_email,
         subject='Test-E-Mail',
-        html_content='<p>Dies ist eine Test-E-Mail von SMTP2GO.</p>'
+        html_content='<p>Dies ist eine Test-E-Mail von Brevo.</p>'
     )
 
-    if success:
+    if response.get('messageId'):
         flash('Test-E-Mail erfolgreich gesendet!', 'success')
     else:
         flash('Fehler beim Senden der Test-E-Mail.', 'error')
 
     return redirect(url_for('index'))
+
+@app.route('/bet/<int:bet_id>')
+def bet_detail(bet_id):
+    with sqlite3.connect('database.db') as conn:
+        conn.row_factory = sqlite3.Row
+        c = conn.cursor()
+        c.execute('SELECT date, subject, description FROM bets WHERE id = ?', (bet_id,))
+        bet = c.fetchone()
+    return render_template('bet_detail.html', bet=bet)
 
 if __name__ == '__main__':
     app.run(debug=True)
