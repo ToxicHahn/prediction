@@ -50,6 +50,15 @@
             <input type="email" id="test_email" name="email" required>
             <input type="submit" value="Test senden">
         </form>
+
+        <div class="sidebar">
+            <h3>Abgeschlossene Wetten</h3>
+            <ul>
+                {% for bet in bets %}
+                    <li><a href="{{ url_for('bet_detail', bet_id=bet.id) }}">{{ bet.subject }} - {{ bet.date }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
     </div>
 </body>
 </html>

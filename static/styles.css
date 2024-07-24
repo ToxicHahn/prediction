@@ -172,3 +172,16 @@ input[type="submit"]:hover {
     background-color: #a777e3;
     transform: translateY(-1px);
 }
+
+
+
+
+.sidebar {
+    position: absolute;
+    top: 50px;
+    right: 20px;
+    width: 200px;
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+}
