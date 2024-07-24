@@ -3,16 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wett-Details</title>
+    <title>Wette Detail</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
+    <div class="background">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
     <div class="container">
-        <h2>Wett-Details</h2>
-        <p><strong>Datum:</strong> {{ bet['date'] }}</p>
-        <p><strong>Betreff:</strong> {{ bet['subject'] }}</p>
-        <p><strong>Beschreibung:</strong> {{ bet['description'] }}</p>
-        <a href="{{ url_for('index') }}">Zurück zur Übersicht</a>
+        <div class="header-message">
+            <h2>Wette Details</h2>
+        </div>
+        <div class="bet-details">
+            <p><strong>Name:</strong> {{ bet.name }}</p>
+            <p><strong>Email:</strong> {{ bet.email }}</p>
+            <p><strong>Datum:</strong> {{ bet.date }}</p>
+            <p><strong>Betreff:</strong> {{ bet.subject }}</p>
+            <p><strong>Beschreibung:</strong></p>
+            <p>{{ bet.description }}</p>
+        </div>
+        <a href="{{ url_for('index') }}" class="button">Zurück zur Übersicht</a>
     </div>
 </body>
 </html>

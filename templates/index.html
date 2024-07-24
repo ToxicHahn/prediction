@@ -47,9 +47,10 @@
         <h3>Abgeschlossene Wetten</h3>
         <ul>
             {% for bet in bets %}
-                <li><a href="#">{{ bet.date }} - {{ bet.subject }}</a></li>
+                <li><a href="{{ url_for('bet_detail', bet_id=bet.id) }}">{{ bet.date }} - {{ bet.subject }}</a></li>
             {% endfor %}
         </ul>
     </div>
+    
 </body>
 </html>

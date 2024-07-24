@@ -55,6 +55,22 @@ def submit():
 
     return redirect(url_for('index'))
 
+@app.route('/bet/<int:bet_id>')
+def bet_detail(bet_id):
+    """Zeigt die Details einer bestimmten Wette an"""
+    with sqlite3.connect('database.db') as conn:
+        conn.row_factory = sqlite3.Row
+        c = conn.cursor()
+        c.execute('SELECT * FROM bets WHERE id = ?', (bet_id,))
+        bet = c.fetchone()
+
+    if bet is None:
+        flash('Wette nicht gefunden', 'error')
+        return redirect(url_for('index'))
+
+    return render_template('bet_detail.html', bet=bet)
+
+
 @app.route('/test_email', methods=['POST'])
 def test_email():
     recipient_email = request.form.get('email')
