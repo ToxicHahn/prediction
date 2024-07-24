@@ -45,15 +45,26 @@ def submit():
     subject = request.form.get('subject')
     description = request.form.get('description')
 
-    html_content = f"<p>Hallo {name},</p><p>{description}</p>"
+    # Validierung der Eingabefelder
+    if not (name and email and date and subject and description):
+        flash('Alle Felder müssen ausgefüllt werden!', 'error')
+        return redirect(url_for('index'))
 
-    if send_email(to=email, subject=f"Vorhersage für {subject}", html_content=html_content):
-        flash('E-Mail wurde erfolgreich gesendet!', 'success')
-        save_bet(name, email, date, subject, description)  # Speichern der Wette
-    else:
-        flash('Fehler beim Senden der E-Mail.', 'error')
+    # Daten in die Datenbank einfügen
+    try:
+        with sqlite3.connect('database.db') as conn:
+            c = conn.cursor()
+            c.execute('''
+                INSERT INTO bets (name, email, date, subject, description)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (name, email, date, subject, description))
+            conn.commit()
+        flash('Wette erfolgreich eingereicht!', 'success')
+    except Exception as e:
+        flash(f'Fehler beim Einfügen der Wette: {e}', 'error')
 
     return redirect(url_for('index'))
+
 
 @app.route('/bet/<int:bet_id>')
 def bet_detail(bet_id):
