@@ -1,10 +1,13 @@
 from flask import Flask, request, render_template, redirect, url_for, flash
 import sqlite3
+<<<<<<< HEAD
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
 import smtplib
 from email.mime.text import MIMEText
 from config import Config
+=======
+>>>>>>> parent of 92e0978 (mails now (theoretically) get send)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = Config.SECRET_KEY
@@ -31,42 +34,6 @@ def init_db():
 @app.before_first_request
 def setup():
     init_db()
-    start_scheduler()
-
-def send_email(to, subject, body):
-    from_email = 'your_email@example.com'
-    from_password = 'your_email_password'
-
-    msg = MIMEText(body, 'html')
-    msg['Subject'] = subject
-    msg['From'] = from_email
-    msg['To'] = to
-
-    with smtplib.SMTP('smtp.example.com', 587) as server:
-        server.starttls()
-        server.login(from_email, from_password)
-        server.send_message(msg)
-
-def check_and_send_emails():
-    now = datetime.now().strftime('%Y-%m-%d')
-    with sqlite3.connect('database.db') as conn:
-        c = conn.cursor()
-        c.execute('''
-            SELECT id, name, email, date, subject, description
-            FROM bets
-            WHERE date = ?
-        ''', (now,))
-        bets_to_notify = c.fetchall()
-        for bet in bets_to_notify:
-            bet_id, name, email, date, subject, description = bet
-            subject_line = f'Erinnerung: Ihre Wette zu "{subject}" ist fällig!'
-            body = f'<p>Hallo {name},</p><p>Ihre Wette vom {date} zu "{subject}" ist nun fällig.</p><p>Beschreibung: {description}</p>'
-            send_email(email, subject_line, body)
-
-def start_scheduler():
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(func=check_and_send_emails, trigger='interval', hours=24)
-    scheduler.start()
 
 @app.route('/')
 def index():
