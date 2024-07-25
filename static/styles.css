@@ -3,7 +3,7 @@ body {
     padding: 0;
     font-family: 'Roboto', sans-serif;
     background-color: #f0f4f8;
-    overflow-y: scroll; /* Seite scrollbar machen */
+    overflow-y: auto; /* Scrollen aktivieren */
 }
 
 .background {
@@ -80,65 +80,74 @@ body {
     }
 }
 
+.main-content {
+    display: flex;
+    justify-content: center;
+    align-items: flex;
+    padding: 50px 20px;
+}
+
 .container {
     position: relative;
-    width: 90%;
-    max-width: 900px; /* Maximale Breite des Containers */
+    width: 70%;
+    max-width: 500px;
     padding: 20px;
     background-color: rgba(255, 255, 255, 0.9);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     border-radius: 12px;
     box-sizing: border-box;
-    margin: 50px; /* Abstand vom Rand des Viewports */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    margin: auto;
+    margin-top: 20px;
+    
 }
 
-.header {
+.header-message {
     margin-bottom: 20px;
+    position: relative;
+    left: -10px;
     background: linear-gradient(135deg, #ff6b6b, #f06595);
     padding: 10px;
     border-radius: 8px;
-    width: 100%; /* Volle Breite des Containers */
+    width: 100%;
     text-align: center;
+
 }
 
-.header h2 {
+.header-message h2 {
     margin: 0;
     color: white;
-    font-size: 1.25rem; /* Kleinere Schriftgröße */
-    font-family: 'Dancing Script', cursive; /* Verspielte Schriftart */
+    font-size: 1.25rem;
+    font-family: 'Dancing Script', cursive;
 }
 
 form {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    width: 100%; /* Volle Breite des Containers */
-    margin-bottom: 20px; /* Abstand zum nächsten Formular */
+    width: 100%;
+    margin-bottom: 20px;
 }
 
 .form-group {
     width: 100%;
-    margin-bottom: 15px; /* Kleinere Abstände zwischen den Feldern */
-    text-align: left;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
 }
 
 label {
-    display: block;
-    font-size: 0.875rem; /* Kleinere Schriftgröße für Labels */
-    margin-bottom: 5px;
+    font-size: 0.875rem;
+    margin-bottom: 1px;
+    margin-top: 10px;
     color: #555;
 }
 
 input, textarea {
     width: 100%;
-    padding: 10px; /* Weniger Padding für Eingabefelder */
-    margin-bottom: 10px;
+    padding: 10px;
+    margin-bottom: 5px;
     border: 1px solid #ddd;
     border-radius: 5px;
-    font-size: 14px; /* Kleinere Schriftgröße */
+    font-size: 14px;
     box-sizing: border-box;
     transition: border-color 0.3s;
 }
@@ -150,18 +159,18 @@ input:focus, textarea:focus {
 
 textarea {
     resize: vertical;
-    height: 80px; /* Kleinere Höhe für Textarea */
+    height: 80px;
 }
 
 input[type="submit"] {
     width: auto;
-    padding: 8px 16px; /* Weniger Padding für den Button */
+    padding: 8px 16px;
     background-color: #6e8efb;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 14px; /* Kleinere Schriftgröße für Button */
+    font-size: 14px;
     transition: background-color 0.3s, transform 0.3s;
 }
 
@@ -171,11 +180,17 @@ input[type="submit"]:hover {
 }
 
 .sidebar {
-    width: 100%; /* Volle Breite innerhalb des Containers */
+    position: relative;
+
+    margin-top: 20px;
+    margin-left: 20px;
+    width: 250px;
     padding: 20px;
     background-color: rgba(255, 255, 255, 0.9);
     border-radius: 12px;
-    margin-top: 20px; /* Abstand zum oberen Inhalt */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+    min-height: 700px;
 }
 
 .sidebar h3 {
@@ -194,15 +209,19 @@ input[type="submit"]:hover {
 }
 
 .sidebar ul li a {
-    text-decoration: none;
+    display: block;
+    padding: 8px 12px;
+    border-radius: 5px;
+    background-color: rgba(110, 142, 251, 0.1);
     color: #6e8efb;
-    transition: color 0.3s;
+    text-decoration: none;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 .sidebar ul li a:hover {
-    color: #a777e3;
+    background-color: #6e8efb;
+    color: white;
 }
-
 
 .bet-details {
     text-align: left;

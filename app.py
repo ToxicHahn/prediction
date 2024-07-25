@@ -4,9 +4,11 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
 import smtplib
 from email.mime.text import MIMEText
+from config import Config
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your_secret_key_here'
+app.config['SECRET_KEY'] = Config.SECRET_KEY
+
 
 # Initialisieren der Datenbank
 def init_db():
@@ -69,6 +71,7 @@ def start_scheduler():
 @app.route('/')
 def index():
     with sqlite3.connect('database.db') as conn:
+        conn.row_factory = sqlite3.Row
         c = conn.cursor()
         c.execute('SELECT id, subject, created_at FROM bets ORDER BY created_at DESC')
         bets = c.fetchall()
